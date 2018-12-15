@@ -18,7 +18,11 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags)
 
     puts("Initializing Memory Module\n");
     mem_init((atag_t *)atags);
+    puts("Memory Initializing Complete\n");
+
+    puts("GPU Initializing \n");
     gpu_init();
+    puts("GPU Initializing Complete\n");
 
     puts("Hello, kernel World!\n");
 

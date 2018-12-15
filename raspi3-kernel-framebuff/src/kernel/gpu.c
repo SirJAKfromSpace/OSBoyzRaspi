@@ -14,6 +14,8 @@ void write_pixel(uint32_t x, uint32_t y, const pixel_t * pix) {
 }
 
 void gpu_putc(char c) {
+
+    puts("Entered gpu_putc method\n");
     static const pixel_t WHITE = {0xff, 0xff, 0xff};
     static const pixel_t BLACK = {0x00, 0x00, 0x00};
     uint8_t w,h;
@@ -52,17 +54,23 @@ void gpu_putc(char c) {
         fbinfo.chars_x = 0;
         fbinfo.chars_y++;
     }
+    puts("Exited gpu_putc method\n");
 }
 
 void gpu_init(void) {
+  puts("Entered gpu_init method\n");
     static const pixel_t BLACK = {0x00, 0x00, 0x00};
+
+      puts("Entered gpu_init method 2\n");
     // Aparantly, this sometimes does not work, so try in a loop
     while(framebuffer_init());
-
+  puts("Entered gpu_init method - 3\n");
     // clear screen
     for (uint32_t j = 0; j < fbinfo.height; j++) {
         for (uint32_t i = 0; i < fbinfo.width; i++) {
             write_pixel(i,j,&BLACK);
         }
     }
+
+    puts("Exit gpu_init method\n");
 }

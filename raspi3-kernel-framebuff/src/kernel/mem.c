@@ -159,6 +159,7 @@ void * kmalloc(uint32_t bytes) {
 }
 
 void kfree(void *ptr) {
+  puts("Entered kfree method \n");
     heap_segment_t * seg;
 
     if (!ptr)
@@ -166,7 +167,7 @@ void kfree(void *ptr) {
 
     seg = ptr - sizeof(heap_segment_t);
     seg->is_allocated = 0;
-
+puts("Entered kfree method 1 \n");
     // try to coalesce segements to the left
     while(seg->prev != NULL && !seg->prev->is_allocated) {
         seg->prev->next = seg->next;
@@ -174,10 +175,14 @@ void kfree(void *ptr) {
         seg->prev->segment_size += seg->segment_size;
         seg = seg->prev;
     }
+    puts("Entered kfree method 2 \n");
     // try to coalesce segments to the right
     while(seg->next != NULL && !seg->next->is_allocated) {
+      puts("Entered kfree while loop \n");
         seg->next->next->prev = seg;
         seg->next = seg->next->next;
         seg->segment_size += seg->next->segment_size;
     }
+
+    puts("Exit kfree method \n");
 }

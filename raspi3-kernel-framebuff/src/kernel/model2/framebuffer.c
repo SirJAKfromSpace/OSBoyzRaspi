@@ -4,6 +4,8 @@
 #include <kernel/mailbox.h>
 
 int framebuffer_init(void) {
+
+    puts("Entered framebuffer_init method\n");
     property_message_tag_t tags[5];
 
 
@@ -17,9 +19,10 @@ int framebuffer_init(void) {
     tags[2].value_buffer.fb_bits_per_pixel = COLORDEPTH;
     tags[3].proptag = NULL_TAG;
 
-
+puts("Entered framebuffer_init method 2\n");
     // Send over the initialization
     if (send_messages(tags) != 0) {
+      puts("entered if statement \n");
         return -1;
     }
 
@@ -31,6 +34,7 @@ int framebuffer_init(void) {
     fbinfo.chars_y = 0;
     fbinfo.pitch = fbinfo.width*BYTES_PER_PIXEL;
 
+puts("Entered framebuffer_init method 3\n");
     // request a framebuffer
     tags[0].proptag = FB_ALLOCATE_BUFFER;
     tags[0].value_buffer.fb_screen_size.width = 0;
@@ -42,10 +46,9 @@ int framebuffer_init(void) {
     if (send_messages(tags) != 0) {
         return -1;
     }
-
+puts("Entered framebuffer_init method 4\n");
     fbinfo.buf = tags[0].value_buffer.fb_allocate_res.fb_addr;
     fbinfo.buf_size = tags[0].value_buffer.fb_allocate_res.fb_size;
 
     return 0;
 }
-
