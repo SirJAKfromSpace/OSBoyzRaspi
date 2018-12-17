@@ -15,7 +15,7 @@ uint32_t mmio_read(uint32_t reg)
     return *(volatile uint32_t*)reg;
 }
 
-
+// Loop <delay> times in a way that the compiler won't optimize away
 void delay(int32_t count)
 {
     asm volatile("__delay_%=: subs %[count], %[count], #1; bne __delay_%=\n"
@@ -44,7 +44,10 @@ void uart_init()
     // Clear pending interrupts.
     mmio_write(UART0_ICR, 0x7FF);
 
-  
+    // Set integer & fractional part of baud rate.
+    // Divider = UART_CLOCK/(16 * Baud)
+    // Fraction part register = (Fractional part * 64) + 0.5
+    // UART_CLOCK = 3000000; Baud = 115200.
 
     // Divider = 3000000 / (16 * 115200) = 1.627 = ~1.
     mmio_write(UART0_IBRD, 1);

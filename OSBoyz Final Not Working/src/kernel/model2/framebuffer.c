@@ -4,8 +4,6 @@
 #include <kernel/mailbox.h>
 
 int framebuffer_init(void) {
-
-
     property_message_tag_t tags[5];
 
 
@@ -22,7 +20,6 @@ int framebuffer_init(void) {
 
     // Send over the initialization
     if (send_messages(tags) != 0) {
-
         return -1;
     }
 
@@ -33,7 +30,6 @@ int framebuffer_init(void) {
     fbinfo.chars_x = 0;
     fbinfo.chars_y = 0;
     fbinfo.pitch = fbinfo.width*BYTES_PER_PIXEL;
-
 
     // request a framebuffer
     tags[0].proptag = FB_ALLOCATE_BUFFER;
@@ -52,3 +48,4 @@ int framebuffer_init(void) {
 
     return 0;
 }
+

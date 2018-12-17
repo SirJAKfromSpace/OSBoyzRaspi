@@ -14,10 +14,6 @@ void write_pixel(uint32_t x, uint32_t y, const pixel_t * pix) {
 }
 
 void gpu_putc(char c) {
-
-
-    printf("Entered gpu_putc\n");
-
     static const pixel_t WHITE = {0xff, 0xff, 0xff};
     static const pixel_t BLACK = {0x00, 0x00, 0x00};
     uint8_t w,h;
@@ -56,12 +52,9 @@ void gpu_putc(char c) {
         fbinfo.chars_x = 0;
         fbinfo.chars_y++;
     }
-
-    printf("Exited gpu_putc\n");
 }
 
 void gpu_init(void) {
-
     static const pixel_t BLACK = {0x00, 0x00, 0x00};
 
     while(framebuffer_init());
@@ -72,6 +65,4 @@ void gpu_init(void) {
             write_pixel(i,j,&BLACK);
         }
     }
-
-
 }

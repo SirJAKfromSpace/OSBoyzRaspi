@@ -7,9 +7,12 @@ mail_message_t mailbox_read(int channel) {
 
 
     do {
+
         do {
             stat = *MAIL0_STATUS;
         } while (stat.empty);
+
+
         res = *MAIL0_READ;
     } while (res.channel != channel);
 
@@ -20,9 +23,12 @@ void mailbox_send(mail_message_t msg, int channel) {
     mail_status_t stat;
     msg.channel = channel;
 
+
+
     do {
         stat = *MAIL0_STATUS;
     } while (stat.full);
+
 
     *MAIL0_WRITE = msg;
 }
@@ -49,7 +55,6 @@ static uint32_t get_value_buffer_len(property_message_tag_t * tag) {
 }
 
 int send_messages(property_message_tag_t * tags) {
-
     property_message_buffer_t * msg;
     mail_message_t mail;
     uint32_t bufsize = 0, i, len, bufpos;
@@ -66,10 +71,8 @@ int send_messages(property_message_tag_t * tags) {
     bufsize += (bufsize % 16) ? 16 - (bufsize % 16) : 0;
 
     msg = kmalloc(bufsize);
-    if (!msg){
-
+    if (!msg)
         return -1;
-    }
 
     msg->size = bufsize;
     msg->req_res_code = REQUEST;
@@ -95,27 +98,23 @@ int send_messages(property_message_tag_t * tags) {
 
     if (msg->req_res_code == REQUEST) {
         kfree(msg);
-
         return 1;
     }
     // Check the response code
     if (msg->req_res_code == RESPONSE_ERROR) {
         kfree(msg);
-
         return 2;
     }
 
 
     // Copy the tags back into the array
     for (i = 0, bufpos = 0; tags[i].proptag != NULL_TAG; i++) {
-
         len = get_value_buffer_len(&tags[i]);
-        bufpos += 3;
+        bufpos += 3; //skip over the tag bookkepping info
         memcpy(&tags[i].value_buffer, msg->tags+bufpos,len);
         bufpos += len/4;
     }
 
     kfree(msg);
     return 0;
-
 }

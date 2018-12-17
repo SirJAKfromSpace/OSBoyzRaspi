@@ -1,4 +1,4 @@
-
+# Don't use normal gcc, use the arm cross compiler
 TOOLCHAIN = C:\Program Files (x86)\GNU Tools Arm Embedded\7 2018-q2-update\bin\arm-none-eabi
 CC = $(TOOLCHAIN)-gcc
 OBJCOPY = $(TOOLCHAIN)-objcopy
@@ -11,7 +11,7 @@ ifeq ($(RASPI_MODEL),1)
 	DIRECTIVES = -D MODEL_1
 	ARCHDIR = model1
 else
-	CPU = cortex-a53
+	CPU = cortex-a7
 	ARCHDIR = model2
 endif
 

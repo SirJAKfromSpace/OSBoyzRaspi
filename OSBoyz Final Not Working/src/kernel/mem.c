@@ -21,7 +21,6 @@ static heap_segment_t * heap_segment_list_head;
 extern uint8_t __end;
 static uint32_t num_pages;
 
-DEFINE_LIST(page);
 IMPLEMENT_LIST(page);
 
 static page_t * all_pages_array;
@@ -36,15 +35,19 @@ void mem_init(atag_t * atags) {
     mem_size = get_mem_size(atags);
     num_pages = mem_size / PAGE_SIZE;
 
-    // Allocate space for all those pages' metadata.
+    // Allocate space for all those pages' metadata.  Start this block just after the stack
     page_array_len = sizeof(page_t) * num_pages;
-    all_pages_array = (page_t *)&__end;
+    all_pages_array = (page_t *)((uint32_t)&__end + KERNEL_STACK_SIZE);
     bzero(all_pages_array, page_array_len);
     INITIALIZE_LIST(free_pages);
 
+    // Find where the page metadata ends and round up to the nearest page
+    page_array_end = (uint32_t)all_pages_array + page_array_len;
+    page_array_end += page_array_end % PAGE_SIZE ? PAGE_SIZE - (page_array_end % PAGE_SIZE) : 0;
+
     // Iterate over all pages and mark them with the appropriate flags
-    // Start with kernel pages
-    kernel_pages = ((uint32_t)&__end) / PAGE_SIZE;
+    // Start with kernel pages, stacks, and page metadata
+    kernel_pages = (page_array_end) / PAGE_SIZE;
     for (i = 0; i < kernel_pages; i++) {
         all_pages_array[i].vaddr_mapped = i * PAGE_SIZE;    // Identity map the kernel pages
         all_pages_array[i].flags.allocated = 1;
@@ -56,7 +59,7 @@ void mem_init(atag_t * atags) {
         all_pages_array[i].flags.allocated = 1;
         all_pages_array[i].flags.kernel_heap_page = 1;
     }
-    // Map the rest of the pages as unallocated
+    // Map the rest of the pages as unallocated, and add them to the free list
     for(; i < num_pages; i++){
         all_pages_array[i].flags.allocated = 0;
         append_page_list(&free_pages, &all_pages_array[i]);
@@ -64,7 +67,6 @@ void mem_init(atag_t * atags) {
 
 
     // Initialize the heap
-    page_array_end = (uint32_t)&__end + page_array_len;
     heap_init(page_array_end);
 
 }
@@ -85,7 +87,7 @@ void * alloc_page(void) {
     // Get the address the physical page metadata refers to
     page_mem = (void *)((page - all_pages_array) * PAGE_SIZE);
 
-
+    // Zero out the page
     bzero(page_mem, PAGE_SIZE);
 
     return page_mem;
@@ -131,7 +133,7 @@ void * kmalloc(uint32_t bytes) {
     if (best == NULL)
         return NULL;
 
-
+  
     if (best_diff > (int)(2 * sizeof(heap_segment_t))) {
         bzero(((void*)(best)) + bytes, sizeof(heap_segment_t));
         curr = best->next;
@@ -148,7 +150,6 @@ void * kmalloc(uint32_t bytes) {
 }
 
 void kfree(void *ptr) {
-
     heap_segment_t * seg;
 
     if (!ptr)
@@ -164,14 +165,10 @@ void kfree(void *ptr) {
         seg->prev->segment_size += seg->segment_size;
         seg = seg->prev;
     }
-
     // try to coalesce segments to the right
     while(seg->next != NULL && !seg->next->is_allocated) {
-
         seg->next->next->prev = seg;
         seg->next = seg->next->next;
         seg->segment_size += seg->next->segment_size;
     }
-
-
 }
